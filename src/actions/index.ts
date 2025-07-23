@@ -1,8 +1,10 @@
 "use server"
-
-
 import {prisma} from "@/lib/prisma"
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+
+
+
 export const saveSnippet= async(id:number, code:string)=>{
     await prisma.snippet.update({
         where:{
@@ -12,6 +14,7 @@ export const saveSnippet= async(id:number, code:string)=>{
             code
         }
     });
+    revalidatePath(`/snippet/${id}`);
     redirect(`/snippet/${id}`)
 }
 
@@ -19,6 +22,7 @@ export const deleteSnippet= async(id: number)=>{
     await prisma.snippet.delete({
         where: {id}
     });
+    revalidatePath("/");
     redirect("/");
 }
 
@@ -46,7 +50,7 @@ export async function createSnippet(prevState:{message:string} , formData:FormDa
 
         // throw new Error("Oops, someting went wrong")
 
-        
+        revalidatePath("/");
     } catch (error: unknown) {
         const message= error instanceof Error? error.message : "an unknown error"
         return {message}
